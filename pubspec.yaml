@@ -1,11 +1,11 @@
 name: alghwalbi_core
 description: "alghwalbi_core is a Flutter package designed to simplify state management and provide commonly used components and services for Flutter applications."
-version: 1.0.1
+version: 1.0.2
 homepage: https://www.linkedin.com/in/ahmed-abdelrahman-ali-96b249201/
 
 environment:
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: ">=1.17.0"
+  sdk: ">=2.18.0 <4.0.0"
+  # flutter: ">=1.17.0"
 
 dependencies:
   auto_animated: ^3.1.0
