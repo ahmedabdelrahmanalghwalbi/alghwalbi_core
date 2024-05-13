@@ -2,6 +2,8 @@ library alghwalbi_core;
 
 import 'dart:core';
 import 'package:alghwalbi_core/services/api_service_helper.dart';
+import 'package:alghwalbi_core/views/custom_animated_pop/animations/custom_rect_tween.dart';
+import 'package:alghwalbi_core/views/custom_animated_pop/animations/heri_dialog_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,6 +33,9 @@ part './views/components/network_image.dart';
 part './views/components/checkbox.dart';
 part './views/components/button_post.dart';
 part './views/components/select_dialog.dart';
+part './views/custom_shimmer_loading/shimmer_animated_loading.dart';
+part './views/custom_animated_pop/animated_popup.dart';
+part './views/lazy_load_widget/lazy_load_widget.dart';
 part 'views/base_page/mobile.scaffold.dart';
 part 'views/base_page/mobile.header.dart';
 part 'views/components/text.dart';
