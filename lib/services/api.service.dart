@@ -141,7 +141,7 @@ class ApiService implements IApiService {
 
       if (asString) {
         data =
-            json.encode(data, toEncodable: customEncode).replaceAll('\"', '\'');
+            json.encode(data, toEncodable: customEncode).replaceAll('"', '\'');
       }
       var body = json.encode(data, toEncodable: customEncode);
 

@@ -41,6 +41,7 @@ abstract class BaseController {
     }
     // ignore: invalid_use_of_protected_member
     else if (state != null && (state?.mounted ?? false)) {
+      // ignore: invalid_use_of_protected_member
       state?.setState(() {});
     }
   }

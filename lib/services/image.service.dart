@@ -63,9 +63,10 @@ class ImageService {
         ApiService.apiURL!.isEmpty ||
         ApiService.apiURL!.contains('null')) {
       return CircleAvatar(
-          child: Icon(Icons.error, color: ThemeService.backgroundColor),
-          radius: radius,
-          backgroundColor: ThemeService.backgroundSecondColor);
+        radius: radius,
+        backgroundColor: ThemeService.backgroundSecondColor,
+        child: Icon(Icons.error, color: ThemeService.backgroundColor),
+      );
     }
 
     // if (kIsWeb) {

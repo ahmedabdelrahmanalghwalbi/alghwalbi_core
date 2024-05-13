@@ -389,7 +389,7 @@ class AppNavigator {
       barrierDismissible: true,
       barrierColor: Colors.transparent,
       barrierLabel: '',
-      pageBuilder: (context, animation1, animation2) => SizedBox.shrink(),
+      pageBuilder: (context, animation1, animation2) => const SizedBox.shrink(),
       transitionBuilder: (dialogContext, a1, a2, _) => _dialogAnimated(
         animation: a1,
         type: animationType,
@@ -502,10 +502,11 @@ class AppNavigator {
               child: RiveAnimation.asset(
                 CoreApp.animactionNameWarning!,
                 fit: BoxFit.scaleDown,
-                stateMachines: ["State Machine 1"],
+                stateMachines: const ["State Machine 1"],
               ));
         } else {
-          return Icon(Icons.error_outline, size: 90.0, color: Colors.yellow);
+          return const Icon(Icons.error_outline,
+              size: 90.0, color: Colors.yellow);
         }
       case MessageType.success:
         if (CoreApp.animactionNameSuccess != null) {
@@ -515,7 +516,7 @@ class AppNavigator {
               child: RiveAnimation.asset(
                 CoreApp.animactionNameSuccess!,
                 fit: BoxFit.scaleDown,
-                stateMachines: ["State Machine 1"],
+                stateMachines: const ["State Machine 1"],
               ));
         } else {
           return const Icon(Icons.done, size: 90.0, color: Colors.green);

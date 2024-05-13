@@ -19,6 +19,7 @@ abstract class CoreController {
     for (var sList in states.values) {
       for (var s in sList) {
         if (s.mounted) {
+          // ignore: invalid_use_of_protected_member
           s.setState(fn);
         }
       }
@@ -91,6 +92,7 @@ abstract class CoreController {
     }
     // ignore: invalid_use_of_protected_member
     else if (state != null && (state?.mounted ?? false)) {
+      // ignore: invalid_use_of_protected_member
       state?.setState(fn ?? () {});
     }
   }
