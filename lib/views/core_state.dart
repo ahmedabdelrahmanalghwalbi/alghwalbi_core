@@ -7,7 +7,7 @@ abstract class CoreStatefulWidget<C extends CoreController>
   /// you can use this id to refresh/setState the widget by the stateID
   /// when null then use the statefull class name
   final String? stateId;
-  CoreStatefulWidget(this.controller, {Key? key, this.stateId}) {
+  CoreStatefulWidget(this.controller, {super.key, this.stateId}) {
     if (beamer() != null && BeamerService.routes.containsKey(beamer()!.path)) {
       debugPrint(
           'XXXXXX you need to register the beamer function in BeamerServer.pages');
@@ -23,8 +23,8 @@ abstract class CoreState<T extends CoreStatefulWidget, C extends CoreController>
 
   /// Whether this [State] object is displayed on the screen.
   bool isDislplayed = false;
-  Future<void> onDisplayed(Widget page, bool _isDislplayed) async {
-    controller.onDisplayed(widget, _isDislplayed);
+  Future<void> onDisplayed(Widget page, bool isDislplayed) async {
+    controller.onDisplayed(widget, isDislplayed);
   }
 
   C createController();

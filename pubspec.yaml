@@ -1,6 +1,6 @@
 name: alghwalbi_core
 description: "alghwalbi_core is a Flutter package designed to simplify state management and provide commonly used components and services for Flutter applications."
-version: 1.0.3
+version: 1.0.4
 homepage: https://www.linkedin.com/in/ahmed-abdelrahman-ali-96b249201/
 
 environment:
@@ -39,6 +39,7 @@ dependencies:
   rive: 0.13.4
   # A flutter package that let you easily add hooks for widget lifecycle
   lifecycle: 0.8.0
+  # Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.
   package_info_plus: 8.0.0
 
 dev_dependencies:

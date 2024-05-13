@@ -14,10 +14,10 @@ class SearchBox extends StatefulWidget {
       this.onSubmit,
       super.key});
   @override
-  _SearchBoxState createState() => _SearchBoxState();
+  SearchBoxState createState() => SearchBoxState();
 }
 
-class _SearchBoxState extends State<SearchBox> {
+class SearchBoxState extends State<SearchBox> {
   FocusNode? focusNode;
   TextEditingController? searchTextController;
   bool hasFocus = false;
@@ -40,8 +40,9 @@ class _SearchBoxState extends State<SearchBox> {
   }
 
   void onChange(val) {
-    if (widget.onChange != null)
+    if (widget.onChange != null) {
       widget.onChange?.call(val.toString().toLowerCase());
+    }
   }
 
   void onSubmit(val) {

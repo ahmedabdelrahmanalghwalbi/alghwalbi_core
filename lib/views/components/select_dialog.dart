@@ -12,10 +12,10 @@ class SelectDialog extends StatefulWidget {
       : super(key: key);
 
   @override
-  _SelectDialogState createState() => _SelectDialogState();
+  SelectDialogState createState() => SelectDialogState();
 }
 
-class _SelectDialogState extends State<SelectDialog> {
+class SelectDialogState extends State<SelectDialog> {
   String? groupId;
   String? selectedItem;
   @override
@@ -41,8 +41,9 @@ class _SelectDialogState extends State<SelectDialog> {
         onPressed: () {
           setState(() {
             selectedItem = row.toString();
-            if (widget.onSelectedChanged != null)
+            if (widget.onSelectedChanged != null) {
               widget.onSelectedChanged?.call(selectedItem);
+            }
           });
         },
         child: Row(

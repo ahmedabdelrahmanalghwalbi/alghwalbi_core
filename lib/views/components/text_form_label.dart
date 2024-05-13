@@ -6,7 +6,7 @@ class TextFormLabel extends StatelessWidget {
   final String label;
   final String? description;
   final TextStyle? valueStyle;
-  TextFormLabel(
+  const TextFormLabel(
       {required this.label,
       this.description,
       this.value,
