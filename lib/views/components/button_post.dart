@@ -33,10 +33,10 @@ class AppButtonPost extends StatefulWidget {
       this.textStyle,
       super.key});
   @override
-  _AppButtonPostState createState() => _AppButtonPostState();
+  AppButtonPostState createState() => AppButtonPostState();
 }
 
-class _AppButtonPostState extends State<AppButtonPost>
+class AppButtonPostState extends State<AppButtonPost>
     with SingleTickerProviderStateMixin {
   double width = 320;
   late AnimationController _controller;
@@ -70,7 +70,7 @@ class _AppButtonPostState extends State<AppButtonPost>
       await widget.onPressed?.call();
       _controller.reverse();
       _isBusy = false;
-    } catch (err) {}
+    } catch (_) {}
   }
 
   showLoading() {

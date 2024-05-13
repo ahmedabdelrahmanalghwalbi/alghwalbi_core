@@ -18,67 +18,102 @@ class ConfigService {
 
   static SharedPreferences? _prefs;
 
-  static set token(v) {
-    if (_prefs == null)
-      init().then((_) => setValueString('token', v));
-    else
-      setValueString('token', v);
-  }
-
-  static set isLogin(v) {
-    if (_prefs == null)
-      init().then((_) => setValueBool('is_login', v));
-    else
-      setValueBool('is_login', v);
-  }
-
-  static bool get isLogin => getValueBool('is_login');
+  ///access token getter
   static String get token => getValueString('token');
+
+  ///access token setter
+  static set token(v) {
+    if (_prefs == null) {
+      init().then((_) => setValueString('token', v));
+    } else {
+      setValueString('token', v);
+    }
+  }
+
+  ///refresh token getter
+  static String get refreshToken => getValueString('refreshToken');
+
+  ///refresh token setter
+  static set refreshToken(v) {
+    if (_prefs == null) {
+      init().then((_) => setValueString('refreshToken', v));
+    } else {
+      setValueString('refreshToken', v);
+    }
+  }
+
+  ///access token expire date getter
+  static int get accessTokenExpDate => getValueInt('accessTokenExpDate');
+
+  ///access token expire date setter
+  static set accessTokenExpDate(v) {
+    if (_prefs == null) {
+      init().then((_) => setValueInt('accessTokenExpDate', v));
+    } else {
+      setValueInt('accessTokenExpDate', v);
+    }
+  }
+
+  ///refresh token expire date getter
+  static int get refreshTokenExpDate => getValueInt('refreshTokenExpDate');
+
+  ///refresh token expire date setter
+  static set refreshTokenExpDate(v) {
+    if (_prefs == null) {
+      init().then((_) => setValueInt('refreshTokenExpDate', v));
+    } else {
+      setValueInt('refreshTokenExpDate', v);
+    }
+  }
+
+  /// getter for is user logged in
+  static bool get isLogin => getValueBool('is_login');
+
+  /// setter for is user logged in
+  static set isLogin(v) {
+    if (_prefs == null) {
+      init().then((_) => setValueBool('is_login', v));
+    } else {
+      setValueBool('is_login', v);
+    }
+  }
 
   /// initlize the config service
   /// you must call before calling any other function
   static Future init() async {
     try {
-      //if(Platform.isAndroid || Platform.isIOS )
       WidgetsFlutterBinding.ensureInitialized();
       if (_prefs != null) return;
       if (CoreApp.isTest) {
         // ignore: invalid_use_of_visible_for_testing_member
         SharedPreferences.setMockInitialValues({'operation_mode': 1});
       }
-      if (kDebugMode) print('----- start prefs');
+      debugPrint('----- start prefs');
       _prefs = await SharedPreferences.getInstance();
-      if (kDebugMode) print('----- prefs as added');
+      debugPrint('----- prefs as added');
     } catch (err, t) {
       if (!kIsWeb && Platform.isWindows) {
-        // print(await path_provider.getLibraryDirectory());
-        //print(await path_provider.getApplicationDocumentsDirectory());
         try {
           var file = File.fromUri(Uri.file(
-              (await path_provider.getApplicationSupportDirectory()).path +
-                  '\\shared_preferences.json',
+              '${(await path_provider.getApplicationSupportDirectory()).path}\\shared_preferences.json',
               windows: true));
           if (await file.exists()) {
             await file.delete();
             _prefs = await SharedPreferences.getInstance();
             return;
           }
-        } catch (err0, t0) {
-          print('XXXXXXXXXXXXXXXXXXX Config init error WINDOWS XXXXXXXXXXXXXX');
-          print(err0);
-          print(t0);
+        } catch (err, t) {
+          debugPrint('XXXXXXXXXXXXXXXXXXX Config init error $err in $t');
         }
-        // print(await path_provider.getDownloadsDirectory());
-        // print(await path_provider.getTemporaryDirectory());
       }
-      print('XXXXXXXXXXXXXXXXXXX Config init error XXXXXXXXXXXXXX');
-      print(err);
-      print(t);
+      debugPrint('XXXXXXXXXXXXXXXXXXX Config init error $err in $t');
     }
-    if (kDebugMode) print('------------Config Done!');
+    debugPrint('------------ Config Done!');
     try {
       _prefs = await SharedPreferences.getInstance();
-    } catch (e) {}
+    } catch (err, t) {
+      debugPrint('XXXXXXXXXXXXXXXXXXX Config init error $err in $t');
+    }
   }
 
   /// remove all local config values
@@ -92,7 +127,6 @@ class ConfigService {
         if (!r) result = false;
       }
     }
-    //await _prefs?.clear();
     return result;
   }
 
@@ -101,18 +135,19 @@ class ConfigService {
     if (_prefs == null) return false;
     await _prefs?.setString(
         key.toString(), json.encode(v, toEncodable: ApiService.customEncode));
-    await Future.delayed(Duration(milliseconds: 250));
+    await Future.delayed(const Duration(milliseconds: 250));
     return true;
   }
 
   /// save data localy
   static Future<bool> setValueString(dynamic key, String? v) async {
     if (_prefs == null) return false;
-    if (v == null)
+    if (v == null) {
       _prefs?.remove(key.toString());
-    else
+    } else {
       await _prefs?.setString(key.toString(), v);
-    await Future.delayed(Duration(milliseconds: 250));
+    }
+    await Future.delayed(const Duration(milliseconds: 250));
     return true;
   }
 
@@ -120,7 +155,7 @@ class ConfigService {
   static Future<bool> setValueBool(dynamic key, bool v) async {
     if (_prefs == null) return false;
     await _prefs?.setBool(key.toString(), v);
-    await Future.delayed(Duration(milliseconds: 250));
+    await Future.delayed(const Duration(milliseconds: 250));
     return true;
   }
 
@@ -128,7 +163,7 @@ class ConfigService {
   static Future<bool> setValueInt(dynamic key, int v) async {
     if (_prefs == null) return false;
     await _prefs?.setInt(key.toString(), v);
-    await Future.delayed(Duration(milliseconds: 250));
+    await Future.delayed(const Duration(milliseconds: 250));
     return true;
   }
 

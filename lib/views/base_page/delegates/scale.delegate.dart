@@ -22,8 +22,8 @@ class ScaleDelegate extends SliverPersistentHeaderDelegate {
             "'scaleX' and 'scaleY' must be less than 1");
   @override
   Widget build(
-      BuildContext context, double shrunkOffset, bool overlapsContent) {
-    final progress = min(shrunkOffset, minExtent) / minExtent;
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final progress = min(shrinkOffset, minExtent) / minExtent;
     return Material(
       color: color,
       elevation: DelegateConfig.elevationValue(progress, elevation),

@@ -8,7 +8,7 @@ class CoreHeader {
   final Widget? child;
   final bool? floating;
   final bool? pinned;
-  final Widget? shrunkChild;
+  final Widget? shrinkChild;
 
   /// builder function taking a progress number on the parameter,
   /// progress value starts from 1 and move to 0 when it's totally shrunk
@@ -33,7 +33,7 @@ class CoreHeader {
         scaleY = null,
         offset = null,
         child = null,
-        shrunkChild = null,
+        shrinkChild = null,
         alignment = null,
         delegate = BuilderDelegate(
           builder: builder!,
@@ -54,7 +54,7 @@ class CoreHeader {
         scaleX = null,
         scaleY = null,
         offset = null,
-        shrunkChild = null,
+        shrinkChild = null,
         minHeight = height,
         maxHeight = height,
         alignment = null,
@@ -78,7 +78,7 @@ class CoreHeader {
         scaleY = null,
         offset = null,
         builder = null,
-        shrunkChild = null,
+        shrinkChild = null,
         minHeight = height,
         maxHeight = height,
         alignment = null,
@@ -92,7 +92,7 @@ class CoreHeader {
   CoreHeader.transform({
     Key? key,
     required this.child,
-    required this.shrunkChild,
+    required this.shrinkChild,
     this.floating,
     this.pinned,
     this.color,
@@ -109,9 +109,9 @@ class CoreHeader {
         alignment = null,
         delegate = TransformDelegate(
           child: child!,
-          shrinkChild: shrunkChild!,
+          shrinkChild: shrinkChild!,
           expandedHeight: expandedHeight,
-          ShrunkHeight: ShrunkHeight,
+          shrinkHeight: ShrunkHeight,
           color: color,
           elevation: elevation,
         );
@@ -131,7 +131,7 @@ class CoreHeader {
   })  : type = CoreHeaderType.scale,
         builder = null,
         offset = null,
-        shrunkChild = null,
+        shrinkChild = null,
         delegate = ScaleDelegate(
           elevation: elevation,
           child: child!,
@@ -157,7 +157,7 @@ class CoreHeader {
         builder = null,
         scaleX = null,
         scaleY = null,
-        shrunkChild = null,
+        shrinkChild = null,
         alignment = null,
         delegate = TransitionDelegate(
             child: child!, offset: offset!, color: color, elevation: elevation);

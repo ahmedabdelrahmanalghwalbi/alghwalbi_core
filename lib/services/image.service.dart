@@ -61,11 +61,12 @@ class ImageService {
         id == 'null' ||
         ApiService.apiURL == null ||
         ApiService.apiURL!.isEmpty ||
-        ApiService.apiURL!.contains('null'))
+        ApiService.apiURL!.contains('null')) {
       return CircleAvatar(
           child: Icon(Icons.error, color: ThemeService.backgroundColor),
           radius: radius,
           backgroundColor: ThemeService.backgroundSecondColor);
+    }
 
     // if (kIsWeb) {
     //   return CircleAvatar(
@@ -101,14 +102,15 @@ class ImageService {
       //   ),
       // ),
       placeholder: (context, url) => CircleAvatar(
-          child:
-              Transform.scale(scale: 0.6, child: CircularProgressIndicator()),
-          radius: radius,
-          backgroundColor: ThemeService.backgroundSecondColor),
+        radius: radius,
+        backgroundColor: ThemeService.backgroundSecondColor,
+        child: Transform.scale(
+            scale: 0.6, child: const CircularProgressIndicator()),
+      ),
       errorWidget: (context, url, error) => CircleAvatar(
-          child: Icon(Icons.error, color: ThemeService.backgroundColor),
           radius: radius,
-          backgroundColor: ThemeService.backgroundSecondColor),
+          backgroundColor: ThemeService.backgroundSecondColor,
+          child: Icon(Icons.error, color: ThemeService.backgroundColor)),
     );
   }
 

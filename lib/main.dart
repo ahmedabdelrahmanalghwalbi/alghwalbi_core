@@ -28,8 +28,18 @@ class CoreApp {
   /// is for testing
   static bool isTest = false;
 
+  /// api url to for checking on (refresh token && access token) expiration date.
+  static String? refreshTokenApiURL;
+
+  /// enable or disable checking for (refresh token && access token) before any request to backend server.
+  static bool? checkOnTokenExpiration;
+
   /// api service class
   static IApiService apiService = ApiServiceMock();
+
+  /// the file name for rive anumationFile
+  static String? gifAssetLoading;
+  static Color? backgroundColorLoading;
 
   /// app version
   static String appVersion = '';

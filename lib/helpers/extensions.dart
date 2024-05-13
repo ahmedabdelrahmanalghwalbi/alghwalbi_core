@@ -3,9 +3,9 @@ part of alghwalbi_core;
 extension StringExtension on String {
   /// convert HexString to Color
   Color? toColorEx([Color? defaultColor]) {
-    var hexColor = this.replaceAll("#", "");
+    var hexColor = replaceAll("#", "");
     if (hexColor.length == 6) {
-      hexColor = "FF" + hexColor;
+      hexColor = "FF$hexColor";
     }
     if (hexColor.length == 8) {
       return Color(int.parse("0x$hexColor"));
@@ -17,6 +17,6 @@ extension StringExtension on String {
 extension ColorExtension on Color {
   /// convert color to HexString
   String toHexString() {
-    return this.value.toRadixString(16);
+    return value.toRadixString(16);
   }
 }

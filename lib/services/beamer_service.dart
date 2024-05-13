@@ -7,6 +7,26 @@ class CoreBeamerPageRoute {
 }
 
 class BeamerService {
+  static List<String> stackRouteHistory = [];
+
+  /// to set page title in browser tab default is true
+  static bool? setBrowserTabTitle;
+
+  /// pageTitle is null in web
+  static Future Function(String route, String? pageTitle)? onNavigate;
+  // your not found page default is BeamPage.notFound
+  static BeamPage? notFoundPageEx;
+  static String? notFoundRedirectNamed;
+  static BeamLocation<RouteInformationSerializable<dynamic>>? notFoundRedirect;
+
+  /// default is BeamPageType.cupertino
+  static BeamPageType? iosBeamPageType;
+
+  /// default is BeamPageType.noTransition
+  static BeamPageType? webBeamPageType;
+
+  /// default is BeamPageType.material
+  static BeamPageType? androidBeamPageType;
   static Map<String, dynamic Function(BuildContext, BeamState, Object?)>?
       _routes;
 
@@ -27,7 +47,7 @@ class BeamerService {
       _routes = r;
       if (routesEx != null) _routes!.addAll(routesEx!);
 
-      if (_routes!.length == 0) _routes = null;
+      if (_routes!.isEmpty) _routes = null;
     }
     return _routes ?? {};
   }
@@ -72,6 +92,20 @@ class BeamerService {
   }
 
   static void pop(BuildContext context, {String? popFailedRoute}) {
+    if (!kIsWeb) {
+      if (Navigator.canPop(context)) {
+        if (stackRouteHistory.isNotEmpty) {
+          stackRouteHistory.removeLast();
+        }
+        Navigator.pop(context);
+      } else {
+        push(
+            context: context,
+            route: popFailedRoute ?? '/',
+            animationType: AnimationTypes.opacity);
+      }
+      return;
+    }
     if (Beamer.of(context).canBeamBack) {
       Beamer.of(context).beamBack();
     } else {
@@ -87,26 +121,74 @@ class BeamerService {
       {required BuildContext context,
       required String route,
       Map<String, dynamic>? data,
-      bool replaceRoute = false}) {
+      bool replaceRoute = false,
+      AnimationTypes animationType = AnimationTypes.none}) {
+    if (!kIsWeb) {
+      if (!route.startsWith('/') && stackRouteHistory.isNotEmpty) {
+        route = '${stackRouteHistory.last}/$route';
+      }
+      stackRouteHistory.add(route);
+      var state = BeamState.fromUri(Uri.parse(route));
+      var k2 = route.split('/');
+      for (var key in BeamerService.routes.keys) {
+        var k1 = key.split('/');
+        if (k1.length != k2.length) continue;
+        var match = true;
+        for (var i = 0; i < k1.length; i++) {
+          if (!k1[i].contains(':') && k1[i] != k2[i]) {
+            match = false;
+            continue;
+          }
+        }
+        if (!match) continue;
+
+        for (var i = 0; i < k1.length; i++) {
+          if (k1[i].contains(':')) {
+            var s = Map<String, String>.from(state.pathParameters);
+            // jsonDecode(jsonEncode());
+            s[k1[i].substring(1)] = k2[i];
+            state = state.copyWith(pathParameters: s);
+          }
+        }
+
+        BeamPage? widget =
+            BeamerService.routes[key]?.call(context, state, data);
+        if (widget != null) {
+          onNavigate?.call(route, widget.title);
+          AppNavigator.navigateTo(context, () => widget.child,
+              replaceAll: replaceRoute, animationType: animationType);
+          return;
+        }
+      }
+      AppNavigator.showMessage(context, 'Invalid route', MessageType.error,
+          message: 'Route $route not found');
+      return;
+    }
+
+    onNavigate?.call(route, null);
     if (replaceRoute) {
       Beamer.of(context)
           .beamToReplacementNamed(route, data: data, stacked: false);
     } else {
-      Beamer.of(context).beamToNamed(
-        route,
-        data: data,
-      );
+      Beamer.of(context).beamToNamed(route, data: data);
     }
   }
 
   static BeamPageType _getPageTransation() {
     if (kIsWeb) {
-      return BeamPageType.noTransition;
+      return webBeamPageType ?? BeamPageType.noTransition;
+    } else if (Platform.isIOS) {
+      return iosBeamPageType ?? BeamPageType.cupertino;
+    } else {
+      return androidBeamPageType ?? BeamPageType.material;
     }
-    return BeamPageType.material;
   }
 
-  static final routerDelegate = BeamerDelegate(
+  static var routerDelegate = BeamerDelegate(
+    setBrowserTabTitle: setBrowserTabTitle ?? true,
+    notFoundRedirectNamed: notFoundRedirectNamed,
+    notFoundRedirect: notFoundRedirect,
+    notFoundPage: notFoundPageEx ?? BeamPage.notFound,
     navigatorObservers: [HeroController(), defaultLifecycleObserver],
     locationBuilder: RoutesLocationBuilder(routes: routes),
   );

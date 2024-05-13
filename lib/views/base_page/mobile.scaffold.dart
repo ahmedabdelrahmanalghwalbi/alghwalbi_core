@@ -11,8 +11,8 @@ class CoreMobileScaffold extends StatelessWidget {
   final Color? backgroundColor;
   final ScrollController controller;
   final Duration? animationDuration;
-  CoreMobileScaffold({
-    Key? key,
+  const CoreMobileScaffold({
+    super.key,
     this.headers,
     this.children,
     this.body,
@@ -95,7 +95,7 @@ class CoreMobileScaffold extends StatelessWidget {
                       childrenBuilder ??
                           (children != null
                               ? ((_, i) => children![i])
-                              : (_, i) => SizedBox()),
+                              : (_, i) => const SizedBox()),
                       childCount: childrenCount,
                     ))
                   : animation.LiveSliverList(
@@ -114,13 +114,13 @@ class CoreMobileScaffold extends StatelessWidget {
                             ).animate(animation),
                             child: SlideTransition(
                               position: Tween<Offset>(
-                                begin: Offset(0, -1.1),
+                                begin: const Offset(0, -1.1),
                                 end: Offset.zero,
                               ).animate(animation),
                               child: (childrenBuilder ??
                                       (children != null
                                           ? ((_, i) => children![i])
-                                          : (_, i) => SizedBox()))
+                                          : (_, i) => const SizedBox()))
                                   .call(context, index),
                             ));
                       },

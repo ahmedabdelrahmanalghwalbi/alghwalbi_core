@@ -20,7 +20,7 @@ class BuilderDelegate extends SliverPersistentHeaderDelegate {
     var progress = 1.0;
     try {
       progress = 1 - (min(shrinkOffset, minExtent) / minExtent);
-    } catch (e) {}
+    } catch (_) {}
     return Material(
       color: color,
       elevation: DelegateConfig.elevationValue(progress, elevation),

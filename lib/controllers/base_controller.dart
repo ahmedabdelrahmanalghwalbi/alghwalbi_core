@@ -39,12 +39,10 @@ abstract class BaseController {
     if (setStateFunction != null) {
       setStateFunction?.call(() {});
     }
-
     // ignore: invalid_use_of_protected_member
     else if (state != null && (state?.mounted ?? false)) {
       state?.setState(() {});
     }
-    ;
   }
 
   /// show message

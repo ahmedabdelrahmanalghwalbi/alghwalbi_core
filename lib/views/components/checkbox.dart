@@ -23,10 +23,10 @@ class AppCheckBox extends StatefulWidget {
       this.isFullrow = false,
       super.key});
   @override
-  _AppCheckBoxState createState() => _AppCheckBoxState();
+  AppCheckBoxState createState() => AppCheckBoxState();
 }
 
-class _AppCheckBoxState extends State<AppCheckBox> {
+class AppCheckBoxState extends State<AppCheckBox> {
   bool _value = false;
   bool? _classValue;
   @override

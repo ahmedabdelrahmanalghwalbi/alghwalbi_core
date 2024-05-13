@@ -4,14 +4,14 @@ class TransformDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   final Widget shrinkChild;
   final double expandedHeight;
-  final double ShrunkHeight;
+  final double shrinkHeight;
   final double elevation;
   final Color? color;
   TransformDelegate({
     required this.child,
     required this.shrinkChild,
     required this.expandedHeight,
-    required this.ShrunkHeight,
+    required this.shrinkHeight,
     this.color,
     this.elevation = 0.0,
   });
@@ -44,7 +44,7 @@ class TransformDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => expandedHeight;
 
   @override
-  double get minExtent => ShrunkHeight;
+  double get minExtent => shrinkHeight;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>

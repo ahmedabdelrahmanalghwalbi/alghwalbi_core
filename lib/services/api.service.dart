@@ -38,15 +38,32 @@ abstract class IApiService {
 }
 
 class ApiService implements IApiService {
+  ApiService() {
+    WidgetsFlutterBinding.ensureInitialized();
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      CoreApp.appVersion = packageInfo.version;
+    });
+  }
+
   /// backend token
   static String get token => ConfigService.token;
 
+  /// set custom headers
+  static set headers(Map<String, String> headers) {
+    _userBaseHeader = headers;
+    _baseHeader = null;
+  }
+
+  static Map<String, String>? _userBaseHeader;
   static Map<String, String>? _baseHeader;
   Map<String, String> get baseHeader {
     if (_baseHeader == null) {
-      _baseHeader = {
-        'AppVersion': CoreApp.appVersion,
-        'DeviceType': kIsWeb
+      _baseHeader = _userBaseHeader ?? {};
+      if (!_baseHeader!.containsKey('AppVersion')) {
+        _baseHeader!['AppVersion'] = CoreApp.appVersion;
+      }
+      if (!_baseHeader!.containsKey('DeviceType')) {
+        _baseHeader!['DeviceType'] = kIsWeb
             ? 'WebBrowser'
             : Platform.isAndroid
                 ? 'Android'
@@ -60,9 +77,9 @@ class ApiService implements IApiService {
                                 ? 'Linux'
                                 : Platform.isFuchsia
                                     ? 'Fuchsia'
-                                    : 'Unknown',
-      };
-      if (!kIsWeb) {
+                                    : 'Unknown';
+      }
+      if (!kIsWeb && !_baseHeader!.containsKey('Accept-Encoding')) {
         _baseHeader!['Accept-Encoding'] = 'gzip';
       }
     }
@@ -70,9 +87,17 @@ class ApiService implements IApiService {
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<Map>> httpGet(String url,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
+      // first : refresh access token using refresh token
+      var validateTokensResult =
+          await ApiServiceHelper.checkExpirationOfTokens<Map>(
+              checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
       var result = await httpGetString(url, header: header);
       if (!result.success) {
         return OperationResult(
@@ -80,7 +105,6 @@ class ApiService implements IApiService {
             message: result.message,
             innerError: result.innerError);
       }
-
       var map = json.decode(result.data ?? '');
       if (kDebugMode) print('$url: ${result.data?.length} length');
 
@@ -100,9 +124,18 @@ class ApiService implements IApiService {
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpPost(String url, dynamic data,
-      [Map<String, String>? header, bool asString = false]) async {
+      [Map<String, String>? header,
+      bool asString = false,
+      bool checkOnTokenExpiration = true]) async {
     try {
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
       var httpClient = http.Client();
       if (kDebugMode) print('POST: ${await _getFullUrl(url)}');
 
@@ -116,7 +149,6 @@ class ApiService implements IApiService {
       for (var h in baseHeader.keys) {
         headers[h] = baseHeader[h]!;
       }
-
       if (token.isNotEmpty) headers['Authorization'] = 'Bearer $token';
 
       http.Response response = await httpClient.post(
@@ -124,8 +156,7 @@ class ApiService implements IApiService {
         headers: {...headers, ...?header},
         body: utf8.encode(body),
       );
-      if (response.statusCode != 200) //&& response.statusCode !=307
-      {
+      if (response.statusCode != 200) {
         debugPrint('statusCode: ${response.statusCode}');
         return OperationResult(
             success: false, message: 'Result code = ${response.statusCode}');
@@ -133,22 +164,27 @@ class ApiService implements IApiService {
       var r = jsonDecode(response.body);
       httpClient.close();
       return parseResponse(r);
-      // } else
-      //   return OperationResult(success: false, message: 'Result code = ${result.statusCode}');
     } catch (err, t) {
-      debugPrint('xxxxxxxxxxxx ERROR: POST   error ==>$err ==>$t');
+      debugPrint('xxxxxxxxxxxx ERROR: POST error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpPut(String url, Map data,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
       var httpClient = http.Client();
 
-      if (kDebugMode) print('PUT: ${await _getFullUrl(url)}');
+      debugPrint('PUT: ${await _getFullUrl(url)}');
 
       var headers = {'content-type': 'application/json'};
       for (var h in baseHeader.keys) {
@@ -162,8 +198,7 @@ class ApiService implements IApiService {
         body: json.encode(data, toEncodable: customEncode),
       );
 
-      if (response.statusCode != 200) //&& response.statusCode !=307
-      {
+      if (response.statusCode != 200) {
         debugPrint(response.statusCode.toString());
         return OperationResult(
             success: false, message: 'Result code = ${response.statusCode}');
@@ -175,20 +210,27 @@ class ApiService implements IApiService {
 
       var r = jsonDecode(reply);
       return parseResponse(r);
-      // } else
-      //   return OperationResult(success: false, message: 'Result code = ${result.statusCode}');
     } catch (err, t) {
-      debugPrint('xxxxxxxxxxxx ERROR: POST  error ==> $err ==> $t');
+      debugPrint('xxxxxxxxxxxx ERROR: POST error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpPostEx(String url, dynamic data,
-      [Map<String, String>? header, bool addToken = true]) async {
+      [Map<String, String>? header,
+      bool addToken = true,
+      bool checkOnTokenExpiration = true]) async {
     try {
-      if (kDebugMode) print('POST: ${await _getFullUrl(url)}');
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
+      debugPrint('POST: ${await _getFullUrl(url)}');
       var httpClient = http.Client();
       var result = await httpClient.post(await _getFullUrl(url),
           body: json.encode(data, toEncodable: customEncode),
@@ -215,17 +257,24 @@ class ApiService implements IApiService {
 
       return parseResponse(r);
     } catch (err, t) {
-      debugPrint('xxxxxxxxxxxx ERROR: POST  error ==> $err $t');
+      debugPrint('xxxxxxxxxxxx ERROR: POST error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpPutEx(String url, dynamic data,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
-      if (kDebugMode) print('PUT: ${await _getFullUrl(url)}');
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
+      debugPrint('PUT: ${await _getFullUrl(url)}');
       var httpClient = http.Client();
       var result = await httpClient.put(await _getFullUrl(url),
           body: json.encode(data, toEncodable: customEncode),
@@ -236,8 +285,7 @@ class ApiService implements IApiService {
             'Authorization': 'Bearer $token'
           });
       httpClient.close();
-      if (result.statusCode != 200) //&& response.statusCode !=307
-      {
+      if (result.statusCode != 200) {
         debugPrint(result.statusCode.toString());
         return OperationResult(
             success: false, message: 'Result code = ${result.statusCode}');
@@ -250,19 +298,24 @@ class ApiService implements IApiService {
       // } else
       //   return OperationResult(success: false, message: 'Result code = ${result.statusCode}');
     } catch (err, t) {
-      debugPrint('xxxxxxxxxxxx ERROR: POST ==> $err ==>$t');
+      debugPrint('xxxxxxxxxxxx ERROR: POST error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpGetDynamic(String url,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
-      if (kDebugMode) {
-        print('GET --------------------- ${await _getFullUrl(url)}');
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
       }
+      debugPrint('GET --------------------- ${await _getFullUrl(url)}');
       var httpClient = http.Client();
       var response = await httpClient.get(
         await _getFullUrl(url),
@@ -282,19 +335,20 @@ class ApiService implements IApiService {
         }
         return OperationResult(
             success: false, message: 'Result code = ${response.statusCode}');
-      } else if (kDebugMode) {
-        print('GET response $url');
+      }
+      {
+        debugPrint('GET response $url');
       }
       String reply = response.body;
 
-      if (reply.length == 0) {
+      if (reply.isEmpty) {
         return OperationResult(success: false, message: 'Result is empty');
       }
 
       var r = jsonDecode(reply);
 
       if (r['success'] != true) {
-        debugPrint(r.toString());
+        debugPrint(r);
         if (r['errorCodeString'] == 'InvalidAuthentication' &&
             IApiService.unauthrizedCallback != null) {
           IApiService.unauthrizedCallback?.call(r);
@@ -303,20 +357,24 @@ class ApiService implements IApiService {
       return parseResponse(r);
     } catch (err, t) {
       debugPrint(
-          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx ERROR: GET: $url  error ==> $err ==>$t');
-
+          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx ERROR: GET: $url error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpDeleteDynamic(String url,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
-      if (kDebugMode) {
-        print('DELETE --------------------- ${await _getFullUrl(url)}');
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
       }
+      debugPrint('DELETE --------------------- ${await _getFullUrl(url)}');
       var httpClient = http.Client();
       var response = await httpClient.delete(await _getFullUrl(url), headers: {
         'content-type': 'application/json',
@@ -332,36 +390,41 @@ class ApiService implements IApiService {
 
       String reply = response.body;
 
-      if (reply.length == 0) {
+      if (reply.isEmpty) {
         return OperationResult(success: false, message: 'Result is empty');
       }
 
       var r = jsonDecode(reply);
 
-      if (r['success'] != true) print(r);
+      if (r['success'] != true) {
+        debugPrint(r.toString());
+      }
       return parseResponse(r);
     } catch (err, t) {
       debugPrint(
-          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   ERROR: DELETE: $url  error ==> $err ==>$t');
-
+          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   ERROR: DELETE: $url error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
   /// call backend and return OperationResult with Map
+  @override
   Future<OperationResult<dynamic>> httpDeleteDynamicEx(String url,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
-      if (kDebugMode) {
-        print('DELETE --------------------- ${await _getFullUrl(url)}');
+      // first : refresh access token using refresh token
+      var validateTokensResult = await ApiServiceHelper.checkExpirationOfTokens(
+          checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
       }
+      debugPrint('DELETE --------------------- ${await _getFullUrl(url)}');
       var httpClient = http.Client();
       var headers = {'content-type': 'application/json'};
       for (var h in baseHeader.keys) {
         headers[h] = baseHeader[h]!;
       }
-
       if (token.isNotEmpty) headers['Authorization'] = 'Bearer $token';
 
       http.Response response = await httpClient
@@ -375,26 +438,35 @@ class ApiService implements IApiService {
       String reply = response.body;
       httpClient.close();
 
-      if (reply.length == 0) {
+      if (reply.isEmpty) {
         return OperationResult(success: false, message: 'Result is empty');
       }
 
       var r = jsonDecode(reply);
 
-      if (r['success'] != true) print(r);
+      if (r['success'] != true) {
+        debugPrint(r.toString());
+      }
       return parseResponse(r);
     } catch (err, t) {
       debugPrint(
-          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   ERROR: DELETE: $url  xxx error ==> $err  ==> t');
-
+          'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   ERROR: DELETE: $url error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }
   }
 
+  @override
   Future<OperationResult<String>> httpGetString(String url,
-      {Map<String, String>? header}) async {
+      {Map<String, String>? header, bool checkOnTokenExpiration = true}) async {
     try {
+      // first : refresh access token using refresh token
+      var validateTokensResult =
+          await ApiServiceHelper.checkExpirationOfTokens<String>(
+              checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
       var httpClient = http.Client();
       var result = await httpClient.get(await _getFullUrl(url), headers: {
         ...baseHeader,
@@ -405,9 +477,10 @@ class ApiService implements IApiService {
       httpClient.close();
       if (result.statusCode == 200) {
         return OperationResult(success: true, data: result.body);
-      } else
+      } else {
         return OperationResult(
             success: false, message: 'Result code = ${result.statusCode}');
+      }
     } catch (err, t) {
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
@@ -424,19 +497,24 @@ class ApiService implements IApiService {
   }
 
   /// call backend and post file like images
+  @override
   Future<OperationResult<String>> httpPostFile(
       String url, Uint8List fileData, String name,
       [Map<String, String>? requestFields,
       Map<String, String>? header,
-      bool isImage = true]) async {
+      bool isImage = true,
+      bool checkOnTokenExpiration = true]) async {
     String dataString;
     try {
-      //print('POST:---- ${_getFullUrl(url)}   $name');
-      //var httpClient = http.Client();
+      // first : refresh access token using refresh token
+      var validateTokensResult =
+          await ApiServiceHelper.checkExpirationOfTokens<String>(
+              checkOnTokenExpiration: checkOnTokenExpiration);
+      if (validateTokensResult.success == false) {
+        return validateTokensResult;
+      }
       var request = http.MultipartRequest("POST", await _getFullUrl(url));
-
       request.headers['Authorization'] = 'Bearer $token';
-      // request.fields['user'] = 'someone@somewhere.com';
       request.files.add(http.MultipartFile.fromBytes(
         'file',
         fileData,
@@ -447,9 +525,7 @@ class ApiService implements IApiService {
       ));
       request.fields['name'] = name;
       request.fields['path'] = 'img';
-
       request.headers["Authorization"] = "Bearer $token";
-      // request.headers["Accept"] = vimeoUploadHeader;
       request.headers["Content-Type"] = "image/jpg";
       if (requestFields != null) {
         request.fields.addAll(requestFields);
@@ -486,8 +562,8 @@ class ApiService implements IApiService {
       return OperationResult(
           success: false, message: 'Error HttpPosFile: ${response.statusCode}');
     } catch (err, t) {
-      debugPrint('XXXXXXXXXXXXXXXX post file error: $err $t');
-
+      debugPrint(
+          'XXXXXXXXXXXXXXXX post file error : $err at : ${t.toString()}');
       return OperationResult(
           success: false, message: err.toString(), innerError: t.toString());
     }

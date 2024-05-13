@@ -29,10 +29,10 @@ class AppButtonIconText extends StatefulWidget {
       this.isFullRow = false,
       super.key});
   @override
-  _AppButtonIconTextState createState() => _AppButtonIconTextState();
+  AppButtonIconTextState createState() => AppButtonIconTextState();
 }
 
-class _AppButtonIconTextState extends State<AppButtonIconText> {
+class AppButtonIconTextState extends State<AppButtonIconText> {
   bool isBussy = false;
   @override
   initState() {
@@ -45,7 +45,7 @@ class _AppButtonIconTextState extends State<AppButtonIconText> {
       setState(() => isBussy = true);
       await widget.onPressed?.call();
       setState(() => isBussy = false);
-    } catch (err) {}
+    } catch (_) {}
   }
 
   @override
@@ -72,10 +72,10 @@ class _AppButtonIconTextState extends State<AppButtonIconText> {
             widget.color == Colors.transparent ? Colors.transparent : null,
         highlightColor:
             widget.color == Colors.transparent ? Colors.transparent : null,
-        padding: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
         color: widget.color ?? ThemeService.mainColor,
         onPressed: onPressed,
-        child: Container(
+        child: SizedBox(
           height: widget.height,
           child: Center(
               child: Row(
