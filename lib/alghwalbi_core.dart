@@ -69,3 +69,4 @@ part 'views/core_state.dart';
 part 'services/sound.service.dart';
 part 'services/platform.service.dart';
 part 'services/excel.service.dart';
+part 'services/static_cache.service.dart';
