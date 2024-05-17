@@ -41,6 +41,14 @@ dependencies:
   lifecycle: 0.8.0
   # Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.
   package_info_plus: 8.0.0
+  # RFC4122 (v1, v4, v5, v6, v7, v8) UUID Generator and Parser for Dart
+  uuid: 4.4.0
+  # A Flutter Sound Pool for playing short audio files. Sound tracks are cached in memory and played directly from cache.
+  soundpool: 2.4.1
+  # A flutter and dart library for reading, creating, editing and updating excel sheets with compatible both on client and server sid
+  excel: 4.0.3
+  # Plugin that allows Flutter apps to generate and print documents to compatible printers on Android, iOS, macOS, Windows, and Linux, as well as web print.
+  printing: 5.12.0
 
 dev_dependencies:
   flutter_test:
@@ -48,8 +56,6 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 dependency_overrides:
-  # visibility_detector: ^0.4.0+2
-  # http: ^0.13.0
 
 
 platforms:
