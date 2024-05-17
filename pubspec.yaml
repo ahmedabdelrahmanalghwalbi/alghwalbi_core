@@ -45,6 +45,10 @@ dependencies:
   printing: 5.12.0
   # Flutter plugin for sharing content via the platform share UI, using the ACTION_SEND intent on Android and UIActivityViewController on iOS.
   share_plus: 9.0.0
+  # Flutter plugin for Firebase Cloud Messaging, a cross-platform messaging solution that lets you reliably deliver messages on Android and iOS.
+  firebase_messaging: 14.9.2
+  # Flutter plugin for Firebase Core, enabling connecting to multiple Firebase apps.
+  firebase_core: 2.31.0
 
 
 dev_dependencies:

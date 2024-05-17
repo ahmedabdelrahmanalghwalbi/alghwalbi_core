@@ -33,9 +33,14 @@ class CoreApp {
 
   /// enable or disable checking for (refresh token && access token) before any request to backend server.
   static bool? checkOnTokenExpiration;
+  //required passing navigator global key in intialization of application
+  static GlobalKey<NavigatorState>? navigatorGlobalKey;
 
   /// api service class
   static IApiService apiService = ApiServiceMock();
+
+  ///path of the app logo image with white Text to use in notification icon
+  static String? logoWithWihteText;
 
   /// the file name for rive anumationFile
   static String? gifAssetLoading;
